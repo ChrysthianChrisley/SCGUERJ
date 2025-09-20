@@ -18,6 +18,15 @@ th.acoes, td.acoes { width: 120px; text-align: center; }
 #mensagem.erro { color: var(--pico-color-red-400); }
 .hidden { display: none; }
 
+/* Estilos da Paginação */
+nav#pagination-controls ul { margin: 0; padding: 0; display: flex; justify-content: center; list-style-type: none; }
+nav#pagination-controls li { margin: 0 0.25rem; }
+nav#pagination-controls li a { padding: 0.5rem 1rem; text-decoration: none; border: 1px solid transparent; border-radius: var(--pico-border-radius); }
+nav#pagination-controls li a:hover { background-color: var(--pico-muted-background-color); }
+nav#pagination-controls li a.active { background-color: var(--pico-primary); color: var(--pico-primary-inverse); border-color: var(--pico-primary); }
+nav#pagination-controls li a.disabled { color: var(--pico-muted-color); pointer-events: none; }
+
+
 /* Estilos Responsivos (Tablet e Celular) */
 @media screen and (max-width: 768px) {
     main.container { max-width: 100%; padding: 0.5rem; }
