@@ -1,0 +1,92 @@
+/* --- ALTERAÇÃO PRINCIPAL --- */
+/* Define o container principal para ocupar 90% da tela e o centraliza */
+main.container {
+    max-width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 1rem;
+}
+
+/* Limita a largura da tela de login para melhor visualização */
+#tela-login {
+    max-width: 420px;
+    margin: 2rem auto;
+}
+
+/* Garante que a tela principal ocupe todo o espaço do container pai */
+#tela-principal {
+    max-width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+/* Faz a tabela rolar horizontalmente se ainda assim não couber */
+.overflow-auto {
+    overflow-x: auto;
+}
+
+/* Força um tema claro para a tabela, sobrescrevendo o tema escuro */
+#tabela-processos {
+    --pico-table-border-color: #d1d5db; /* Cor da borda cinza claro */
+    --pico-color: #111827; /* Cor do texto preto */
+}
+
+#tabela-processos th {
+    background-color: #f9fafb; /* Fundo do cabeçalho cinza bem claro */
+    color: var(--pico-color);
+    border-color: var(--pico-table-border-color);
+}
+
+#tabela-processos td,
+#tabela-processos input[type="text"] {
+    background-color: #ffffff; /* Fundo branco para todas as células e inputs */
+    color: var(--pico-color);
+    border-color: var(--pico-table-border-color);
+}
+
+/* Estilo para células que podem ser editadas (agora com texto preto) */
+td[contenteditable="true"] {
+    background-color: #f0f8ff; /* Fundo azul claro para indicar edição */
+    cursor: text;
+}
+td[contenteditable="true"]:focus {
+    background-color: #e6f3ff;
+    outline: 2px solid var(--primary);
+    box-shadow: 0 0 5px var(--primary-focus);
+}
+
+/* Coluna de ações com largura fixa */
+th.acoes, td.acoes {
+    width: 120px;
+    text-align: center;
+}
+
+/* Estiliza o botão de salvar para ser mais compacto */
+.save-button {
+    --pico-font-size: 0.8em;
+    --pico-padding: 0.25rem 0.5rem;
+    color: #ffffff; /* Texto branco no botão */
+    background-color: #16a34a; /* Verde */
+    border-color: #15803d;
+}
+.save-button:hover {
+    background-color: #15803d;
+}
+
+/* Mensagens de feedback */
+#mensagem {
+    min-height: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 1rem;
+    transition: opacity 0.3s ease-in-out;
+    color: var(--pico-primary); /* Usa a cor primária para feedback de sucesso no tema escuro */
+}
+#mensagem.erro { 
+    color: var(--pico-color-red-400); 
+}
+
+/* Classe para esconder linhas durante a filtragem */
+.hidden {
+    display: none;
+}
