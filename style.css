@@ -1,4 +1,9 @@
-/* --- ALTERAÇÃO PRINCIPAL --- */
+
+/* Estilos do Login e Botão Google */
+.login-card { text-align: center; margin-top: 5vh; padding: 2rem; }
+#tela-login > article > div { display: inline-block; } /* Centraliza o botão do Google */
+
+
 /* Define o container principal para ocupar 90% da tela e o centraliza */
 main.container {
     max-width: 90%;
@@ -20,33 +25,30 @@ main.container {
     margin: 0;
 }
 
-/* Faz a tabela rolar horizontalmente se ainda assim não couber */
 .overflow-auto {
     overflow-x: auto;
 }
 
-/* Força um tema claro para a tabela, sobrescrevendo o tema escuro */
 #tabela-processos {
-    --pico-table-border-color: #d1d5db; /* Cor da borda cinza claro */
-    --pico-color: #111827; /* Cor do texto preto */
+    --pico-table-border-color: #d1d5db;
+    --pico-color: #111827;
 }
 
 #tabela-processos th {
-    background-color: #f9fafb; /* Fundo do cabeçalho cinza bem claro */
+    background-color: #f9fafb;
     color: var(--pico-color);
     border-color: var(--pico-table-border-color);
 }
 
 #tabela-processos td,
 #tabela-processos input[type="text"] {
-    background-color: #ffffff; /* Fundo branco para todas as células e inputs */
+    background-color: #ffffff;
     color: var(--pico-color);
     border-color: var(--pico-table-border-color);
 }
 
-/* Estilo para células que podem ser editadas (agora com texto preto) */
 td[contenteditable="true"] {
-    background-color: #f0f8ff; /* Fundo azul claro para indicar edição */
+    background-color: #f0f8ff;
     cursor: text;
 }
 td[contenteditable="true"]:focus {
@@ -55,38 +57,88 @@ td[contenteditable="true"]:focus {
     box-shadow: 0 0 5px var(--primary-focus);
 }
 
-/* Coluna de ações com largura fixa */
 th.acoes, td.acoes {
     width: 120px;
     text-align: center;
 }
 
-/* Estiliza o botão de salvar para ser mais compacto */
 .save-button {
     --pico-font-size: 0.8em;
     --pico-padding: 0.25rem 0.5rem;
-    color: #ffffff; /* Texto branco no botão */
-    background-color: #16a34a; /* Verde */
+    color: #ffffff;
+    background-color: #16a34a;
     border-color: #15803d;
 }
-.save-button:hover {
-    background-color: #15803d;
-}
+.save-button:hover { background-color: #15803d; }
 
-/* Mensagens de feedback */
 #mensagem {
     min-height: 1.5rem;
     font-weight: bold;
     text-align: center;
     margin-top: 1rem;
     transition: opacity 0.3s ease-in-out;
-    color: var(--pico-primary); /* Usa a cor primária para feedback de sucesso no tema escuro */
+    color: var(--pico-primary);
 }
-#mensagem.erro { 
-    color: var(--pico-color-red-400); 
-}
+#mensagem.erro { color: var(--pico-color-red-400); }
 
-/* Classe para esconder linhas durante a filtragem */
-.hidden {
-    display: none;
+.hidden { display: none; }
+
+/* --- ESTILOS RESPONSIVOS (TABLET E CELULAR) --- */
+/* Aplicado em telas com largura máxima de 768px */
+@media screen and (max-width: 768px) {
+    main.container {
+        max-width: 100%; /* Ocupa toda a largura em telas pequenas */
+        padding: 0.5rem;
+    }
+
+    #tabela-processos thead {
+        display: none; /* Esconde o cabeçalho da tabela */
+    }
+
+    #tabela-processos tr {
+        display: block; /* Transforma cada linha em um bloco/card */
+        margin-bottom: 1rem;
+        border: 1px solid var(--pico-table-border-color);
+        border-radius: var(--pico-border-radius);
+        padding: 0.5rem;
+    }
+
+    #tabela-processos tfoot tr {
+      border: 2px dashed var(--pico-primary); /* Destaque para a linha de adicionar */
+    }
+
+    #tabela-processos td {
+        display: block; /* Empilha as células verticalmente */
+        text-align: right; /* Alinha o valor à direita */
+        position: relative;
+        padding-left: 50%; /* Deixa espaço à esquerda para o rótulo */
+        border: none;
+        border-bottom: 1px dotted #ccc;
+    }
+
+    #tabela-processos td:last-child {
+        border-bottom: none;
+    }
+
+    /* A mágica acontece aqui: cria o rótulo da coluna antes de cada célula */
+    #tabela-processos td:before {
+        content: attr(data-label); /* Pega o texto do atributo data-label */
+        position: absolute;
+        left: 0.5rem;
+        width: 45%;
+        padding-right: 1rem;
+        font-weight: bold;
+        text-align: left;
+    }
+
+    /* Ajustes para a célula de ações e o formulário de adição */
+    #tabela-processos td.acoes,
+    #tabela-processos tfoot td {
+        padding-left: 0;
+        text-align: center;
+    }
+    #tabela-processos td.acoes:before,
+    #tabela-processos tfoot td:before {
+        display: none;
+    }
 }

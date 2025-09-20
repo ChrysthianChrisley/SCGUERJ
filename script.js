@@ -1,11 +1,18 @@
 // !---- SUA URL DO APP DA WEB ----!
 const API_URL = "https://script.google.com/macros/s/AKfycbzqMZzovwh2W_Dkt_Y4fnMvQUHgzYCJjKqe33FcJ3h_taSSm0dccCpULcjyHh9dV1hA/exec";
+// 2. Seu ID do Cliente. Já está preenchido abaixo.
+const GOOGLE_CLIENT_ID = "522436703477-t7n58ba0hom4741a2o2tp5uoarkjf943.apps.googleusercontent.com";
+
+
+// --- Variáveis Globais ---
+let id_token = null;
 
 // --- Variável para armazenar o usuário logado ---
 let loggedInUser = null;
 
 // --- Seletores de Elementos Globais ---
 const telaLogin = document.getElementById('tela-login');
+const loginMessage = document.getElementById('login-message');
 const telaPrincipal = document.getElementById('tela-principal');
 const formLogin = document.getElementById('form-login');
 const loginButton = document.getElementById('login-button');
@@ -17,27 +24,64 @@ const addNewButton = document.getElementById('add-new-button');
 const novaLinhaForm = document.getElementById('nova-linha-form');
 const mensagem = document.getElementById('mensagem');
 
+// --- Lógica de Autenticação (Google Identity Services) ---
+
+// Esta função é chamada AUTOMATICAMENTE pela biblioteca do Google após o login
+function handleCredentialResponse(response) {
+  id_token = response.credential; // Armazena o token de identidade seguro
+  
+  // Decodifica o token (apenas para pegar o nome do usuário para a UI, sem validar)
+  const payload = JSON.parse(atob(id_token.split('.')[1]));
+  const userName = payload.given_name || payload.name.split(' ')[0];
+  
+  // Atualiza a UI
+  welcomeMessage.textContent = `Bem-vindo(a), ${userName}.`;
+  telaLogin.style.display = 'none';
+  telaPrincipal.style.display = 'block';
+
+  // Carrega os dados da planilha
+  carregarDadosIniciais();
+}
+
 // --- Funções Auxiliares ---
 
+// --- Funções de Comunicação com a API ---
 async function callApi(action, payload = {}, button = null) {
-    if (button) button.setAttribute('aria-busy', 'true');
-    setMensagem('', '');
-    try {
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            mode: 'cors',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action, payload }),
-        });
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return await response.json();
-    } catch (error) {
-        console.error("Erro ao chamar API:", error);
-        setMensagem('Falha na comunicação com o servidor.', 'erro');
-        return { status: 'error', message: 'Falha na comunicação.' };
-    } finally {
-        if (button) button.removeAttribute('aria-busy');
+  if (button) button.setAttribute('aria-busy', 'true');
+  setMensagem('', '');
+  
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      mode: 'cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ 
+        action, 
+        payload,
+        idToken: id_token // Envia o token de identidade em cada requisição
+      }),
+      redirect: 'follow'
+    });
+    
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const result = await response.json();
+
+    if (result.status === 'error') throw new Error(result.message);
+    
+    return result;
+  } catch (error) {
+    console.error("Erro ao chamar API:", error);
+    setMensagem(error.message, 'erro');
+    if (error.message.includes('Acesso negado')) {
+        // Se o token expirar ou for inválido, desloga o usuário
+        telaPrincipal.style.display = 'none';
+        telaLogin.style.display = 'block';
+        loginMessage.textContent = "Sua sessão expirou ou não é válida. Por favor, faça login novamente.";
     }
+    return null;
+  } finally {
+    if (button) button.removeAttribute('aria-busy');
+  }
 }
 
 function setMensagem(texto, tipo = 'sucesso') {

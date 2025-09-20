@@ -1,0 +1,186 @@
+<script>
+// --- Seletores de Elementos Globais ---
+const telaLogin = document.getElementById('tela-login');
+const loginMessage = document.getElementById('login-message');
+const loginButton = document.getElementById('login-button');
+const telaPrincipal = document.getElementById('tela-principal');
+const welcomeMessage = document.getElementById('welcome-message');
+const tabelaBody = document.querySelector("#tabela-processos tbody");
+const campoBusca = document.getElementById('campo-busca');
+const addNewButton = document.getElementById('add-new-button');
+const novaLinhaForm = document.getElementById('nova-linha-form');
+const mensagem = document.getElementById('mensagem');
+
+
+// --- Lógica de Autenticação (Executada ao carregar a página) ---
+
+document.addEventListener("DOMContentLoaded", function() {
+  // Chama a função 'getUserInfo' no backend para saber o status do usuário
+  google.script.run
+    .withSuccessHandler(handleAuthSuccess)
+    .withFailureHandler(handleAuthFailure)
+    .getUserInfo();
+});
+
+function handleAuthSuccess(userInfo) {
+  // Usamos um switch para tratar cada caso retornado pelo backend
+  switch (userInfo.status) {
+    case 'AUTHORIZED':
+      // USUÁRIO AUTORIZADO: Mostra a aplicação principal
+      welcomeMessage.textContent = `Bem-vindo(a), ${userInfo.name}.`;
+      telaLogin.style.display = 'none';
+      telaPrincipal.style.display = 'block';
+      carregarDadosIniciais();
+      break;
+    
+    case 'UNAUTHORIZED':
+      // USUÁRIO LOGADO, MAS NÃO AUTORIZADO: Mostra mensagem de erro
+      loginMessage.textContent = `Acesso Negado. O e-mail ${userInfo.email} não tem permissão.`;
+      loginButton.style.display = 'inline-flex'; // Mostra o botão para tentar com outra conta
+      loginButton.querySelector('span').textContent = 'Tentar com outra conta';
+      break;
+
+    case 'LOGGED_OUT':
+    default:
+      // USUÁRIO DESLOGADO: Mostra o botão de login
+      loginMessage.textContent = 'Para continuar, faça login com sua conta Google.';
+      loginButton.style.display = 'inline-flex';
+      break;
+  }
+}
+
+function handleAuthFailure(error) {
+  loginMessage.textContent = `Ocorreu um erro: ${error.message}. Tente recarregar a página.`;
+}
+
+
+// --- Funções de Manipulação da Tabela ---
+
+/**
+ * Busca todos os dados da planilha e chama a função para popular a tabela.
+ */
+function carregarDadosIniciais() {
+  tabelaBody.innerHTML = `<tr><td colspan="7" aria-busy="true">Carregando dados da planilha...</td></tr>`;
+  google.script.run
+    .withSuccessHandler(popularTabela)
+    .withFailureHandler(err => {
+        tabelaBody.innerHTML = `<tr><td colspan="7">Erro ao carregar os dados.</td></tr>`;
+        setMensagem(err.message, 'erro');
+    })
+    .getAllData();
+}
+
+/**
+ * Preenche a tabela com os dados recebidos da API, incluindo data-labels para responsividade.
+ * @param {Array<object>} dados - Um array de objetos, onde cada objeto é uma linha.
+ */
+function popularTabela(dados) {
+    tabelaBody.innerHTML = '';
+    if (!dados || dados.length === 0) {
+        tabelaBody.innerHTML = `<tr><td colspan="7">Nenhum processo encontrado.</td></tr>`;
+        return;
+    }
+    dados.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.setAttribute('data-linha-id', item.linha);
+        tr.innerHTML = `
+            <td data-label="Processo" data-field="processo">${item.processo}</td>
+            <td contenteditable="true" data-label="Ação da Secretaria" data-field="acao">${item.acao}</td>
+            <td contenteditable="true" data-label="Assunto" data-field="assunto">${item.assunto}</td>
+            <td contenteditable="true" data-label="Responsável" data-field="responsavel">${item.responsavel}</td>
+            <td contenteditable="true" data-label="Histórico/Andamento" data-field="historico">${item.historico}</td>
+            <td data-label="Registro de Alteração" data-field="registro">${item.registro || ''}</td>
+            <td data-label="Ações" class="acoes"><button class="save-button" data-linha-id="${item.linha}">Salvar</button></td>
+        `;
+        tabelaBody.appendChild(tr);
+    });
+}
+
+
+// --- Event Listeners para Interação do Usuário ---
+
+// 1. FILTRAR a tabela ao digitar no campo de busca
+campoBusca.addEventListener('input', (e) => {
+    const termoBusca = e.target.value.toLowerCase();
+    tabelaBody.querySelectorAll('tr').forEach(linha => {
+        const textoLinha = linha.textContent.toLowerCase();
+        linha.classList.toggle('hidden', !textoLinha.includes(termoBusca));
+    });
+});
+
+// 2. SALVAR uma linha editada ao clicar no botão "Salvar"
+tabelaBody.addEventListener('click', (e) => {
+    if (e.target.classList.contains('save-button')) {
+        const button = e.target;
+        const tr = button.closest('tr');
+        const linhaId = tr.getAttribute('data-linha-id');
+
+        const dadosParaSalvar = {
+            linha: linhaId,
+            processo: tr.querySelector('[data-field="processo"]').textContent,
+            acao: tr.querySelector('[data-field="acao"]').textContent,
+            assunto: tr.querySelector('[data-field="assunto"]').textContent,
+            responsavel: tr.querySelector('[data-field="responsavel"]').textContent,
+            historico: tr.querySelector('[data-field="historico"]').textContent,
+        };
+        
+        button.setAttribute('aria-busy', 'true');
+        google.script.run
+            .withSuccessHandler(result => {
+                setMensagem(result.message, 'sucesso');
+                tr.querySelector('[data-field="registro"]').textContent = result.newLog;
+            })
+            .withFailureHandler(err => setMensagem(err.message, 'erro'))
+            .withFinally(() => button.removeAttribute('aria-busy'))
+            .updateRow(dadosParaSalvar);
+    }
+});
+
+// 3. ADICIONAR uma nova linha ao clicar no botão "Adicionar"
+addNewButton.addEventListener('click', () => {
+    const button = addNewButton;
+    const inputs = novaLinhaForm.querySelectorAll('input');
+    const dadosParaAdicionar = {};
+    let formValido = true;
+
+    inputs.forEach(input => {
+        dadosParaAdicionar[input.name] = input.value;
+        if (!input.value && input.name === 'processo') {
+            input.focus();
+            formValido = false;
+        }
+    });
+
+    if (!formValido) {
+        setMensagem('O campo "Processo" é obrigatório para adicionar uma nova linha.', 'erro');
+        return;
+    }
+
+    button.setAttribute('aria-busy', 'true');
+    google.script.run
+        .withSuccessHandler(result => {
+            setMensagem(result.message, 'sucesso');
+            inputs.forEach(input => input.value = ''); // Limpa os campos
+            carregarDadosIniciais(); // Recarrega a tabela
+        })
+        .withFailureHandler(err => setMensagem(err.message, 'erro'))
+        .withFinally(() => button.removeAttribute('aria-busy'))
+        .addNewRow(dadosParaAdicionar);
+});
+
+
+// --- Função Utilitária ---
+
+/**
+ * Exibe uma mensagem de feedback para o usuário.
+ * @param {string} texto - A mensagem a ser exibida.
+ * @param {string} tipo - 'sucesso' ou 'erro'.
+ */
+function setMensagem(texto, tipo = 'sucesso') {
+    mensagem.textContent = texto;
+    mensagem.className = tipo;
+    if (texto) {
+        setTimeout(() => setMensagem('', ''), 4000);
+    }
+}
+</script>

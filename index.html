@@ -3,62 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consulta de Processos SCG-UERJ</title>
+    <title>Painel de Processos SCGUERJ</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
     <main class="container">
       
         <section id="tela-login">
-            <hgroup>
-                <h1>Consulta de Processos</h1>
-                <h2>Acesso ao sistema</h2>
-            </hgroup>
-            <form id="form-login">
-                <input type="text" id="usuario" name="usuario" placeholder="Usuário" required>
-                <input type="password" id="senha" name="senha" placeholder="Senha" required>
-                <button type="submit" id="login-button">Entrar</button>
-                <small id="login-erro" class="erro"></small>
-            </form>
+            <article class="login-card">
+                <hgroup>
+                    <h1>Painel de Processos</h1>
+                    <p id="login-message">Para continuar, faça login com sua conta Google.</p>
+                </hgroup>
+                
+                <div id="g_id_onload"
+                     data-callback="handleCredentialResponse"
+                     data-auto_prompt="false">
+                </div>
+                <div class="g_id_signin"
+                     data-type="standard"
+                     data-size="large"
+                     data-theme="outline"
+                     data-text="sign_in_with"
+                     data-shape="rectangular"
+                     data-logo_alignment="left">
+                </div>
+
+            </article>
         </section>
 
         <section id="tela-principal" style="display:none;">
-            <hgroup>
+           <header>
+             <hgroup>
                 <h1>Painel de Processos</h1>
                 <h2 id="welcome-message"></h2>
-            </hgroup>
-            
-            <input type="search" id="campo-busca" placeholder="🔎 Digite para filtrar qualquer informação da tabela...">
-            
+             </hgroup>
+           </header>
+            <input type="search" id="campo-busca" placeholder="🔎 Digite para filtrar...">
             <div class="overflow-auto">
                 <table role="grid" id="tabela-processos">
-                    <thead>
-                        <tr>
-                            <th scope="col">Processo</th>
-                            <th scope="col">Ação da Secretaria</th>
-                            <th scope="col">Assunto</th>
-                            <th scope="col">Responsável</th>
-                            <th scope="col">Histórico/Andamento</th>
-                            <th scope="col">Registro de Alteração</th>
-                            <th scope="col" class="acoes">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td colspan="7" aria-busy="true">Carregando...</td></tr>
-                    </tbody>
-                    <tfoot>
-                        <tr id="nova-linha-form">
-                            <td><input type="text" placeholder="Novo Processo" name="processo"></td>
-                            <td><input type="text" placeholder="Ação" name="acao"></td>
-                            <td><input type="text" placeholder="Assunto" name="assunto"></td>
-                            <td><input type="text" placeholder="Responsável" name="responsavel"></td>
-                            <td><input type="text" placeholder="Histórico" name="historico"></td>
-                            <td></td>
-                            <td class="acoes"><button id="add-new-button">Adicionar</button></td>
-                        </tr>
-                    </tfoot>
-                </table>
+                    </table>
             </div>
             <p id="mensagem"></p>
         </section>
