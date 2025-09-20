@@ -40,10 +40,8 @@
                     <thead>
                         <tr>
                             <th scope="col">Processo</th>
-                            <th scope="col">Ação da Secretaria</th>
                             <th scope="col">Assunto</th>
                             <th scope="col">Responsável</th>
-                            <th scope="col">Histórico/Andamento</th>
                             <th scope="col">Registro de Alteração</th>
                             <th scope="col" class="acoes">Ações</th>
                         </tr>
@@ -51,13 +49,13 @@
                     <tbody></tbody>
                     <tfoot>
                         <tr id="nova-linha-form">
-                            <td><input type="text" placeholder="Novo Processo" name="processo"></td>
-                            <td><input type="text" placeholder="Ação" name="acao"></td>
+                            <td><input type="text" placeholder="Processo" name="processo"></td>
                             <td><input type="text" placeholder="Assunto" name="assunto"></td>
                             <td><input type="text" placeholder="Responsável" name="responsavel"></td>
-                            <td><input type="text" placeholder="Histórico" name="historico"></td>
                             <td></td>
                             <td class="acoes"><button id="add-new-button">Adicionar</button></td>
+                            <input type="hidden" name="acao" value="">
+                            <input type="hidden" name="historico" value="">
                         </tr>
                     </tfoot>
                 </table>

@@ -1,4 +1,7 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbwy6HpFMudQmxDqImORVwbQZbQH0bQFSI59w1vd0xJstLULdE1B84wevRFBoq8S-ywBIQ/exec";
+// ======================================================================
+//             !!! ATENÇÃO: COLOQUE SUA URL DA API AQUI !!!
+// ======================================================================
+const API_URL = "https://script.google.com/macros/s/AKfycbx204GMqVOn_KtF29VG8d5Kt6DbZLhZ1MCrz5eNbI6AmbcBin1LmLriw7jCM9WwOlwbcg/exec";
 
 // --- Variáveis Globais ---
 let id_token = null;
@@ -24,7 +27,6 @@ function handleCredentialResponse(response) {
 // --- O script principal só roda depois que o HTML está completamente carregado ---
 window.addEventListener('DOMContentLoaded', () => {
   
-  // Anexa o objeto do nosso aplicativo à janela para ser acessível globalmente
   window.app = {};
   
   // --- Seletores de Elementos ---
@@ -63,7 +65,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   window.app.carregarPagina = async function(page, searchTerm = '') {
-    tabelaBody.innerHTML = `<tr><td colspan="7" aria-busy="true">Carregando dados...</td></tr>`;
+    tabelaBody.innerHTML = `<tr><td colspan="5" aria-busy="true">Carregando dados...</td></tr>`;
     paginationControls.innerHTML = '';
     paginationStatus.innerHTML = '';
     const payload = { page, pageSize: PAGE_SIZE, searchTerm };
@@ -74,20 +76,26 @@ window.addEventListener('DOMContentLoaded', () => {
       popularTabela(result.data);
       renderPagination(result.pagination);
     } else {
-      tabelaBody.innerHTML = `<tr><td colspan="7">Falha ao carregar os dados.</td></tr>`;
+      tabelaBody.innerHTML = `<tr><td colspan="5">Falha ao carregar os dados.</td></tr>`;
     }
   }
 
   function popularTabela(dados) {
       tabelaBody.innerHTML = '';
       if (!dados || dados.length === 0) {
-          tabelaBody.innerHTML = `<tr><td colspan="7">Nenhum processo encontrado.</td></tr>`;
+          tabelaBody.innerHTML = `<tr><td colspan="5">Nenhum processo encontrado.</td></tr>`;
           return;
       }
       dados.forEach(item => {
           const tr = document.createElement('tr');
           tr.setAttribute('data-linha-id', item.linha);
-          tr.innerHTML = `<td data-label="Processo" data-field="processo">${item.processo}</td><td contenteditable="true" data-label="Ação da Secretaria" data-field="acao">${item.acao}</td><td contenteditable="true" data-label="Assunto" data-field="assunto">${item.assunto}</td><td contenteditable="true" data-label="Responsável" data-field="responsavel">${item.responsavel}</td><td contenteditable="true" data-label="Histórico/Andamento" data-field="historico">${item.historico}</td><td data-label="Registro de Alteração" data-field="registro">${item.registro || ''}</td><td data-label="Ações" class="acoes"><button class="save-button" data-linha-id="${item.linha}">Salvar</button></td>`;
+          tr.innerHTML = `
+              <td data-label="Processo" data-field="processo">${item.processo}</td>
+              <td data-label="Assunto" data-field="assunto">${item.assunto}</td>
+              <td data-label="Responsável" data-field="responsavel">${item.responsavel}</td>
+              <td data-label="Registro de Alteração" data-field="registro">${item.registro || ''}</td>
+              <td data-label="Ações" class="acoes"><button class="save-button" data-linha-id="${item.linha}">Editar/Salvar</button></td>
+          `;
           tabelaBody.appendChild(tr);
       });
   }
@@ -136,23 +144,36 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   tabelaBody.addEventListener('click', async (e) => {
-      if (e.target.classList.contains('save-button')) {
-          const button = e.target;
-          const tr = button.closest('tr');
-          const dadosParaSalvar = {
-              linha: tr.getAttribute('data-linha-id'),
-              processo: tr.querySelector('[data-field="processo"]').textContent,
-              acao: tr.querySelector('[data-field="acao"]').textContent,
-              assunto: tr.querySelector('[data-field="assunto"]').textContent,
-              responsavel: tr.querySelector('[data-field="responsavel"]').textContent,
-              historico: tr.querySelector('[data-field="historico"]').textContent,
-          };
-          const result = await callApi('updateRow', dadosParaSalvar, button);
-          if (result) {
-              setMensagem(result.message, 'sucesso');
-              tr.querySelector('[data-field="registro"]').textContent = result.newLog;
-          }
+    if (e.target.classList.contains('save-button')) {
+      const button = e.target;
+      const tr = button.closest('tr');
+      const celulasEditaveis = tr.querySelectorAll('[data-field="assunto"], [data-field="responsavel"]');
+
+      // Alterna entre modo de edição e modo de salvar
+      if (button.textContent === 'Editar/Salvar') {
+        celulasEditaveis.forEach(cell => cell.setAttribute('contenteditable', 'true'));
+        button.textContent = 'Salvar Alterações';
+        tr.querySelector('[data-field="assunto"]').focus();
+      } else {
+        celulasEditaveis.forEach(cell => cell.setAttribute('contenteditable', 'false'));
+        button.textContent = 'Editar/Salvar';
+
+        const dadosParaSalvar = {
+            linha: tr.getAttribute('data-linha-id'),
+            processo: tr.querySelector('[data-field="processo"]').textContent,
+            assunto: tr.querySelector('[data-field="assunto"]').textContent,
+            responsavel: tr.querySelector('[data-field="responsavel"]').textContent,
+            // Precisamos buscar os dados completos para não apagar o que está oculto
+            acao: '', // Será preenchido no backend
+            historico: '' // Será preenchido no backend
+        };
+        const result = await callApi('updateRow', dadosParaSalvar, button);
+        if (result) {
+            setMensagem(result.message, 'sucesso');
+            tr.querySelector('[data-field="registro"]').textContent = result.newLog;
+        }
       }
+    }
   });
 
   tfoot.addEventListener('click', async (e) => {
@@ -170,7 +191,7 @@ window.addEventListener('DOMContentLoaded', () => {
               }
           });
           if (!formValido) {
-              setMensagem('O campo "Processo" é obrigatório para adicionar uma nova linha.', 'erro');
+              setMensagem('O campo "Processo" é obrigatório.', 'erro');
               return;
           }
           const result = await callApi('addNewRow', dadosParaAdicionar, button);

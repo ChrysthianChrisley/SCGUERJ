@@ -9,9 +9,8 @@ main.container { max-width: 90%; margin-left: auto; margin-right: auto; padding:
 #tabela-processos { --pico-table-border-color: #d1d5db; --pico-color: #111827; }
 #tabela-processos th { background-color: #f9fafb; color: var(--pico-color); border-color: var(--pico-table-border-color); }
 #tabela-processos td, #tabela-processos input[type="text"] { background-color: #ffffff; color: var(--pico-color); border-color: var(--pico-table-border-color); }
-td[contenteditable="true"] { background-color: #f0f8ff; cursor: text; }
-td[contenteditable="true"]:focus { background-color: #e6f3ff; outline: 2px solid var(--primary); box-shadow: 0 0 5px var(--primary-focus); }
-th.acoes, td.acoes { width: 120px; text-align: center; }
+td[contenteditable="true"] { background-color: #f0f8ff; cursor: text; outline: 2px solid var(--pico-primary-focus); }
+th.acoes, td.acoes { width: 140px; text-align: center; }
 .save-button { --pico-font-size: 0.8em; --pico-padding: 0.25rem 0.5rem; color: #ffffff; background-color: #16a34a; border-color: #15803d; }
 .save-button:hover { background-color: #15803d; }
 #mensagem { min-height: 1.5rem; font-weight: bold; text-align: center; margin-top: 1rem; transition: opacity 0.3s ease-in-out; color: var(--pico-primary); }
@@ -19,15 +18,14 @@ th.acoes, td.acoes { width: 120px; text-align: center; }
 .hidden { display: none; }
 
 /* Estilos da Paginação */
-nav#pagination-controls ul { margin: 0; padding: 0; display: flex; justify-content: center; list-style-type: none; }
+nav#pagination-controls ul { margin: 1rem 0 0 0; padding: 0; display: flex; justify-content: center; list-style-type: none; }
 nav#pagination-controls li { margin: 0 0.25rem; }
 nav#pagination-controls li a { padding: 0.5rem 1rem; text-decoration: none; border: 1px solid transparent; border-radius: var(--pico-border-radius); }
 nav#pagination-controls li a:hover { background-color: var(--pico-muted-background-color); }
 nav#pagination-controls li a.active { background-color: var(--pico-primary); color: var(--pico-primary-inverse); border-color: var(--pico-primary); }
 nav#pagination-controls li a.disabled { color: var(--pico-muted-color); pointer-events: none; }
 
-
-/* Estilos Responsivos (Tablet e Celular) */
+/* Estilos Responsivos */
 @media screen and (max-width: 768px) {
     main.container { max-width: 100%; padding: 0.5rem; }
     #tabela-processos thead { display: none; }
