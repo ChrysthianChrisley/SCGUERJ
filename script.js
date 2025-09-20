@@ -26,7 +26,10 @@ const mensagem = document.getElementById('mensagem');
 
 // --- Lógica de Autenticação (Google Identity Services) ---
 
-// Esta função é chamada AUTOMATICAMENTE pela biblioteca do Google após o login
+/**
+ * Esta função é chamada AUTOMATICAMENTE pela biblioteca do Google após o login bem-sucedido.
+ * @param {object} response - O objeto de credencial retornado pelo Google.
+ */
 function handleCredentialResponse(response) {
   id_token = response.credential; // Armazena o token de identidade seguro
   
@@ -42,8 +45,6 @@ function handleCredentialResponse(response) {
   // Carrega os dados da planilha
   carregarDadosIniciais();
 }
-
-// --- Funções Auxiliares ---
 
 // --- Funções de Comunicação com a API ---
 async function callApi(action, payload = {}, button = null) {
