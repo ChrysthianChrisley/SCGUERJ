@@ -1,22 +1,15 @@
-// !---- SUA URL DO APP DA WEB ----!
-const API_URL = "https://script.google.com/macros/s/AKfycbzqMZzovwh2W_Dkt_Y4fnMvQUHgzYCJjKqe33FcJ3h_taSSm0dccCpULcjyHh9dV1hA/exec";
-// 2. Seu ID do Cliente. Já está preenchido abaixo.
-const GOOGLE_CLIENT_ID = "522436703477-t7n58ba0hom4741a2o2tp5uoarkjf943.apps.googleusercontent.com";
-
+// ======================================================================
+//             !!! ATENÇÃO: VERIFIQUE SE ESTA URL ESTÁ CORRETA !!!
+// ======================================================================
+const API_URL = "https://script.google.com/macros/s/AKfycbwy6HpFMudQmxDqImORVwbQZbQH0bQFSI59w1vd0xJstLULdE1B84wevRFBoq8S-ywBIQ/exec";
 
 // --- Variáveis Globais ---
-let id_token = null;
-
-// --- Variável para armazenar o usuário logado ---
-let loggedInUser = null;
+let id_token = null; // Armazena o token de identidade do Google após o login
 
 // --- Seletores de Elementos Globais ---
 const telaLogin = document.getElementById('tela-login');
 const loginMessage = document.getElementById('login-message');
 const telaPrincipal = document.getElementById('tela-principal');
-const formLogin = document.getElementById('form-login');
-const loginButton = document.getElementById('login-button');
-const loginErro = document.getElementById('login-erro');
 const welcomeMessage = document.getElementById('welcome-message');
 const tabelaBody = document.querySelector("#tabela-processos tbody");
 const campoBusca = document.getElementById('campo-busca');
@@ -31,18 +24,15 @@ const mensagem = document.getElementById('mensagem');
  * @param {object} response - O objeto de credencial retornado pelo Google.
  */
 function handleCredentialResponse(response) {
-  id_token = response.credential; // Armazena o token de identidade seguro
+  id_token = response.credential;
   
-  // Decodifica o token (apenas para pegar o nome do usuário para a UI, sem validar)
   const payload = JSON.parse(atob(id_token.split('.')[1]));
   const userName = payload.given_name || payload.name.split(' ')[0];
   
-  // Atualiza a UI
   welcomeMessage.textContent = `Bem-vindo(a), ${userName}.`;
   telaLogin.style.display = 'none';
   telaPrincipal.style.display = 'block';
 
-  // Carrega os dados da planilha
   carregarDadosIniciais();
 }
 
@@ -57,14 +47,14 @@ async function callApi(action, payload = {}, button = null) {
       mode: 'cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ 
-        action, 
-        payload,
-        idToken: id_token // Envia o token de identidade em cada requisição
+        action: action, 
+        payload: payload,
+        idToken: id_token
       }),
       redirect: 'follow'
     });
     
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     const result = await response.json();
 
     if (result.status === 'error') throw new Error(result.message);
@@ -74,10 +64,9 @@ async function callApi(action, payload = {}, button = null) {
     console.error("Erro ao chamar API:", error);
     setMensagem(error.message, 'erro');
     if (error.message.includes('Acesso negado')) {
-        // Se o token expirar ou for inválido, desloga o usuário
         telaPrincipal.style.display = 'none';
         telaLogin.style.display = 'block';
-        loginMessage.textContent = "Sua sessão expirou ou não é válida. Por favor, faça login novamente.";
+        loginMessage.textContent = "Acesso negado pelo servidor. Verifique se seu e-mail está autorizado.";
     }
     return null;
   } finally {
@@ -85,71 +74,41 @@ async function callApi(action, payload = {}, button = null) {
   }
 }
 
-function setMensagem(texto, tipo = 'sucesso') {
-    mensagem.textContent = texto;
-    mensagem.className = tipo;
-    if (texto) {
-        setTimeout(() => setMensagem('', ''), 4000);
-    }
+// --- Funções de Manipulação da Tabela ---
+async function carregarDadosIniciais() {
+  tabelaBody.innerHTML = `<tr><td colspan="7" aria-busy="true">Carregando dados da planilha...</td></tr>`;
+  const result = await callApi('getAllData');
+  if (result) {
+    popularTabela(result.data);
+  } else {
+    tabelaBody.innerHTML = `<tr><td colspan="7">Falha ao carregar os dados.</td></tr>`;
+  }
 }
 
 function popularTabela(dados) {
     tabelaBody.innerHTML = '';
-    if (dados.length === 0) {
+    if (!dados || dados.length === 0) {
         tabelaBody.innerHTML = `<tr><td colspan="7">Nenhum processo encontrado.</td></tr>`;
         return;
     }
     dados.forEach(item => {
         const tr = document.createElement('tr');
         tr.setAttribute('data-linha-id', item.linha);
-        // Adiciona a célula para o registro de alteração
         tr.innerHTML = `
-            <td data-field="processo">${item.processo}</td>
-            <td contenteditable="true" data-field="acao">${item.acao}</td>
-            <td contenteditable="true" data-field="assunto">${item.assunto}</td>
-            <td contenteditable="true" data-field="responsavel">${item.responsavel}</td>
-            <td contenteditable="true" data-field="historico">${item.historico}</td>
-            <td data-field="registro">${item.registro || ''}</td>
-            <td class="acoes"><button class="save-button" data-linha-id="${item.linha}">Salvar</button></td>
+            <td data-label="Processo" data-field="processo">${item.processo}</td>
+            <td contenteditable="true" data-label="Ação da Secretaria" data-field="acao">${item.acao}</td>
+            <td contenteditable="true" data-label="Assunto" data-field="assunto">${item.assunto}</td>
+            <td contenteditable="true" data-label="Responsável" data-field="responsavel">${item.responsavel}</td>
+            <td contenteditable="true" data-label="Histórico/Andamento" data-field="historico">${item.historico}</td>
+            <td data-label="Registro de Alteração" data-field="registro">${item.registro || ''}</td>
+            <td data-label="Ações" class="acoes"><button class="save-button" data-linha-id="${item.linha}">Salvar</button></td>
         `;
         tabelaBody.appendChild(tr);
     });
 }
 
-// --- Lógica Principal e Eventos ---
 
-async function carregarDadosIniciais() {
-    tabelaBody.innerHTML = `<tr><td colspan="7" aria-busy="true">Carregando dados da planilha...</td></tr>`;
-    const result = await callApi('getAllData');
-    if (result.status === 'success') {
-        popularTabela(result.data);
-    } else {
-        tabelaBody.innerHTML = `<tr><td colspan="7">Erro ao carregar os dados.</td></tr>`;
-        setMensagem(result.message, 'erro');
-    }
-}
-
-formLogin.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    loginErro.textContent = '';
-    const usuario = document.getElementById('usuario').value;
-    const senha = document.getElementById('senha').value;
-    
-    const result = await callApi('autenticar', { usuario, senha }, loginButton);
-
-    if (result.status === 'success' && result.authenticated) {
-        // Armazena o nome do usuário logado
-        loggedInUser = result.username; 
-        welcomeMessage.textContent = `Bem-vindo(a), ${loggedInUser}. Consulte, edite e adicione processos.`;
-        
-        telaLogin.style.display = 'none';
-        telaPrincipal.style.display = 'block';
-        carregarDadosIniciais();
-    } else {
-        loginErro.textContent = 'Usuário ou senha inválidos.';
-    }
-});
-
+// --- Event Listeners para Interação do Usuário ---
 campoBusca.addEventListener('input', (e) => {
     const termoBusca = e.target.value.toLowerCase();
     tabelaBody.querySelectorAll('tr').forEach(linha => {
@@ -161,8 +120,8 @@ campoBusca.addEventListener('input', (e) => {
 tabelaBody.addEventListener('click', async (e) => {
     if (e.target.classList.contains('save-button')) {
         const button = e.target;
-        const linhaId = button.getAttribute('data-linha-id');
         const tr = button.closest('tr');
+        const linhaId = tr.getAttribute('data-linha-id');
 
         const dadosParaSalvar = {
             linha: linhaId,
@@ -173,15 +132,10 @@ tabelaBody.addEventListener('click', async (e) => {
             historico: tr.querySelector('[data-field="historico"]').textContent,
         };
         
-        // Envia os dados E o nome do usuário logado para a API
-        const result = await callApi('updateRow', { data: dadosParaSalvar, username: loggedInUser }, button);
-        
-        if (result.status === 'success') {
+        const result = await callApi('updateRow', dadosParaSalvar, button);
+        if (result) {
             setMensagem(result.message, 'sucesso');
-            // Atualiza o campo de registro na tela sem precisar recarregar tudo
             tr.querySelector('[data-field="registro"]').textContent = result.newLog;
-        } else {
-            setMensagem(result.message, 'erro');
         }
     }
 });
@@ -204,14 +158,19 @@ addNewButton.addEventListener('click', async () => {
         return;
     }
 
-    // Envia os dados E o nome do usuário logado para a API
-    const result = await callApi('addNewRow', { data: dadosParaAdicionar, username: loggedInUser }, addNewButton);
-
-    if (result.status === 'success') {
+    const result = await callApi('addNewRow', dadosParaAdicionar, addNewButton);
+    if (result) {
         setMensagem(result.message, 'sucesso');
         inputs.forEach(input => input.value = '');
-        carregarDadosIniciais(); // Recarrega a tabela para incluir a nova linha
-    } else {
-        setMensagem(result.message, 'erro');
+        carregarDadosIniciais();
     }
 });
+
+// --- Função Utilitária ---
+function setMensagem(texto, tipo = 'sucesso') {
+    mensagem.textContent = texto;
+    mensagem.className = tipo;
+    if (texto) {
+        setTimeout(() => setMensagem('', ''), 4000);
+    }
+}

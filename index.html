@@ -4,18 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Processos SCGUERJ</title>
+    
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-
     <main class="container">
       
         <section id="tela-login">
             <article class="login-card">
                 <hgroup>
-                    <h1>Painel de Processos</h1>
+                    <h1><a href="#"></a>Painel de Processos</a></h1>
                     <p id="login-message">Para continuar, faça login com sua conta Google.</p>
                 </hgroup>
                 
@@ -32,7 +33,6 @@
                      data-shape="rectangular"
                      data-logo_alignment="left">
                 </div>
-
             </article>
         </section>
 
@@ -46,7 +46,31 @@
             <input type="search" id="campo-busca" placeholder="🔎 Digite para filtrar...">
             <div class="overflow-auto">
                 <table role="grid" id="tabela-processos">
-                    </table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Processo</th>
+                            <th scope="col">Ação da Secretaria</th>
+                            <th scope="col">Assunto</th>
+                            <th scope="col">Responsável</th>
+                            <th scope="col">Histórico/Andamento</th>
+                            <th scope="col">Registro de Alteração</th>
+                            <th scope="col" class="acoes">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                    <tfoot>
+                        <tr id="nova-linha-form">
+                            <td><input type="text" placeholder="Novo Processo" name="processo"></td>
+                            <td><input type="text" placeholder="Ação" name="acao"></td>
+                            <td><input type="text" placeholder="Assunto" name="assunto"></td>
+                            <td><input type="text" placeholder="Responsável" name="responsavel"></td>
+                            <td><input type="text" placeholder="Histórico" name="historico"></td>
+                            <td></td>
+                            <td class="acoes"><button id="add-new-button">Adicionar</button></td>
+                        </tr>
+                    </tfoot>
+                </table>
             </div>
             <p id="mensagem"></p>
         </section>

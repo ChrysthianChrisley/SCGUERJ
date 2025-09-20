@@ -1,144 +1,32 @@
-
 /* Estilos do Login e Botão Google */
 .login-card { text-align: center; margin-top: 5vh; padding: 2rem; }
-#tela-login > article > div { display: inline-block; } /* Centraliza o botão do Google */
+#tela-login > article > div { display: inline-block; }
 
-
-/* Define o container principal para ocupar 90% da tela e o centraliza */
-main.container {
-    max-width: 90%;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 1rem;
-}
-
-/* Limita a largura da tela de login para melhor visualização */
-#tela-login {
-    max-width: 420px;
-    margin: 2rem auto;
-}
-
-/* Garante que a tela principal ocupe todo o espaço do container pai */
-#tela-principal {
-    max-width: 100%;
-    padding: 0;
-    margin: 0;
-}
-
-.overflow-auto {
-    overflow-x: auto;
-}
-
-#tabela-processos {
-    --pico-table-border-color: #d1d5db;
-    --pico-color: #111827;
-}
-
-#tabela-processos th {
-    background-color: #f9fafb;
-    color: var(--pico-color);
-    border-color: var(--pico-table-border-color);
-}
-
-#tabela-processos td,
-#tabela-processos input[type="text"] {
-    background-color: #ffffff;
-    color: var(--pico-color);
-    border-color: var(--pico-table-border-color);
-}
-
-td[contenteditable="true"] {
-    background-color: #f0f8ff;
-    cursor: text;
-}
-td[contenteditable="true"]:focus {
-    background-color: #e6f3ff;
-    outline: 2px solid var(--primary);
-    box-shadow: 0 0 5px var(--primary-focus);
-}
-
-th.acoes, td.acoes {
-    width: 120px;
-    text-align: center;
-}
-
-.save-button {
-    --pico-font-size: 0.8em;
-    --pico-padding: 0.25rem 0.5rem;
-    color: #ffffff;
-    background-color: #16a34a;
-    border-color: #15803d;
-}
+/* Estilos Gerais (Desktop First) */
+main.container { max-width: 90%; margin-left: auto; margin-right: auto; padding: 1rem; }
+#tela-principal { max-width: 100%; padding: 0; margin: 0; }
+.overflow-auto { overflow-x: auto; }
+#tabela-processos { --pico-table-border-color: #d1d5db; --pico-color: #111827; }
+#tabela-processos th { background-color: #f9fafb; color: var(--pico-color); border-color: var(--pico-table-border-color); }
+#tabela-processos td, #tabela-processos input[type="text"] { background-color: #ffffff; color: var(--pico-color); border-color: var(--pico-table-border-color); }
+td[contenteditable="true"] { background-color: #f0f8ff; cursor: text; }
+td[contenteditable="true"]:focus { background-color: #e6f3ff; outline: 2px solid var(--primary); box-shadow: 0 0 5px var(--primary-focus); }
+th.acoes, td.acoes { width: 120px; text-align: center; }
+.save-button { --pico-font-size: 0.8em; --pico-padding: 0.25rem 0.5rem; color: #ffffff; background-color: #16a34a; border-color: #15803d; }
 .save-button:hover { background-color: #15803d; }
-
-#mensagem {
-    min-height: 1.5rem;
-    font-weight: bold;
-    text-align: center;
-    margin-top: 1rem;
-    transition: opacity 0.3s ease-in-out;
-    color: var(--pico-primary);
-}
+#mensagem { min-height: 1.5rem; font-weight: bold; text-align: center; margin-top: 1rem; transition: opacity 0.3s ease-in-out; color: var(--pico-primary); }
 #mensagem.erro { color: var(--pico-color-red-400); }
-
 .hidden { display: none; }
 
-/* --- ESTILOS RESPONSIVOS (TABLET E CELULAR) --- */
-/* Aplicado em telas com largura máxima de 768px */
+/* Estilos Responsivos (Tablet e Celular) */
 @media screen and (max-width: 768px) {
-    main.container {
-        max-width: 100%; /* Ocupa toda a largura em telas pequenas */
-        padding: 0.5rem;
-    }
-
-    #tabela-processos thead {
-        display: none; /* Esconde o cabeçalho da tabela */
-    }
-
-    #tabela-processos tr {
-        display: block; /* Transforma cada linha em um bloco/card */
-        margin-bottom: 1rem;
-        border: 1px solid var(--pico-table-border-color);
-        border-radius: var(--pico-border-radius);
-        padding: 0.5rem;
-    }
-
-    #tabela-processos tfoot tr {
-      border: 2px dashed var(--pico-primary); /* Destaque para a linha de adicionar */
-    }
-
-    #tabela-processos td {
-        display: block; /* Empilha as células verticalmente */
-        text-align: right; /* Alinha o valor à direita */
-        position: relative;
-        padding-left: 50%; /* Deixa espaço à esquerda para o rótulo */
-        border: none;
-        border-bottom: 1px dotted #ccc;
-    }
-
-    #tabela-processos td:last-child {
-        border-bottom: none;
-    }
-
-    /* A mágica acontece aqui: cria o rótulo da coluna antes de cada célula */
-    #tabela-processos td:before {
-        content: attr(data-label); /* Pega o texto do atributo data-label */
-        position: absolute;
-        left: 0.5rem;
-        width: 45%;
-        padding-right: 1rem;
-        font-weight: bold;
-        text-align: left;
-    }
-
-    /* Ajustes para a célula de ações e o formulário de adição */
-    #tabela-processos td.acoes,
-    #tabela-processos tfoot td {
-        padding-left: 0;
-        text-align: center;
-    }
-    #tabela-processos td.acoes:before,
-    #tabela-processos tfoot td:before {
-        display: none;
-    }
+    main.container { max-width: 100%; padding: 0.5rem; }
+    #tabela-processos thead { display: none; }
+    #tabela-processos tr { display: block; margin-bottom: 1rem; border: 1px solid var(--pico-table-border-color); border-radius: var(--pico-border-radius); padding: 0.5rem; }
+    #tabela-processos tfoot tr { border: 2px dashed var(--pico-primary); }
+    #tabela-processos td { display: block; text-align: right; position: relative; padding-left: 50%; border: none; border-bottom: 1px dotted #ccc; }
+    #tabela-processos td:last-child { border-bottom: none; }
+    #tabela-processos td:before { content: attr(data-label); position: absolute; left: 0.5rem; width: 45%; padding-right: 1rem; font-weight: bold; text-align: left; }
+    #tabela-processos td.acoes, #tabela-processos tfoot td { padding-left: 0; text-align: center; }
+    #tabela-processos td.acoes:before, #tabela-processos tfoot td:before { display: none; }
 }
